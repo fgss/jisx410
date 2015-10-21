@@ -60,6 +60,21 @@ def get_mesh_boundaries(mesh):
         else:
             lon = (lon[0], lon[1], lon_s)
 
+        if len(mesh) == 8:
+            lat_s = int(mesh[6]) * 30
+            lat_s = lat[2] + lat_s
+            if lat_s >= 60:
+                lat = (lat[0], lat[1] + lat_s//60, lat_s % 60)
+            else:
+                lat = (lat[0], lat[1], lat_s)
+
+            lon_s = int(mesh[7]) * 45
+            lon_s = lon[2] + lon_s
+            if lon_s >= 60:
+                lon = (lon[0], lon[1] + lon_s//60, lon_s % 60)
+            else:
+                lon = (lon[0], lon[1], lon_s)
+
     return (lat, lon)
 
 
@@ -100,3 +115,28 @@ def get_mesh_three(lat, lon):
     lon_position = math.floor(lon_diff / M3_STEP_LON)
 
     return mesh_two + str(lat_position) + str(lon_position)
+
+
+def get_mesh_middle(mesh):
+    """Gets a middle point for a mesh
+    Send back a tuple (lat, lon)"""
+
+    if len(mesh) == 4:
+        return get_mesh_boundaries(mesh+'44')
+    elif len(mesh) == 6:
+        return get_mesh_boundaries(mesh+'55')
+    else:
+        boundaries = get_mesh_boundaries(mesh)
+        lat = boundaries[0]
+        lon = boundaries[1]
+
+        lat_s = lat[2] + 15
+        lat = (lat[0], lat[1], lat_s)
+
+        lon_s = lon[2] + 22
+        if lon_s >= 60:
+            lon = (lon[0], lon[1] + lon_s//60, lon_s % 60)
+        else:
+            lon = (lon[0], lon[1], lon_s)
+
+        return (lat, lon)

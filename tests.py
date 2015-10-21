@@ -23,6 +23,15 @@ def test_get_mesh_boundaries():
     assert jisx410.get_mesh_boundaries("533907") == ((35, 20, 0),
                                                      (139, 52, 30))
 
+    assert jisx410.get_mesh_boundaries("53390700") == ((35, 20, 0),
+                                                       (139, 52, 30))
+
+    assert jisx410.get_mesh_boundaries("53390711") == ((35, 20, 30),
+                                                       (139, 53, 15))
+
+    assert jisx410.get_mesh_boundaries("53390732") == ((35, 21, 30),
+                                                       (139, 54, 00))
+
 
 def test_get_diff_dms():
     assert jisx410.get_diff_dms((35, 20, 0), (35, 35, 24)) == 924
@@ -38,3 +47,12 @@ def test_get_mesh_two():
 
 def test_get_mesh_three():
     assert jisx410.get_mesh_three(35.3375, 139.883333) == '53390700'
+
+
+def test_get_mesh_middle():
+    assert jisx410.get_mesh_middle('5339') == jisx410.get_mesh_boundaries("533944")
+    assert jisx410.get_mesh_middle('533933') == jisx410.get_mesh_boundaries("53393355")
+    assert jisx410.get_mesh_middle('53390732') == ((35, 21, 45),
+                                                   (139, 54, 22))
+    assert jisx410.get_mesh_middle("53390703") == ((35, 20, 15),
+                                                   (139, 55, 7))
