@@ -28,6 +28,48 @@ def convert_decimal_to_dms(elem):
     return (d, m, s)
 
 
+def move_up(mesh):
+    """Navigate one mesh up"""
+    if len(mesh) == 4:
+        return str(int(mesh[:2])+1) + mesh[2:]
+
+    elif len(mesh) == 6:
+        mesh2 = mesh[4:6]
+        if int(mesh2[0]) < 7:
+            return mesh[:4] + str(int(mesh2[0])+1) + mesh2[1]
+        else:
+            return move_up(mesh[:4]) + '0' + mesh2[1]
+    else:
+        mesh2 = mesh[4:6]
+        mesh3 = mesh[6:]
+
+        if int(mesh3[0]) < 9:
+            return mesh[:6] + str(int(mesh3[0])+1) + mesh3[1]
+        else:
+            return move_up(mesh[:6]) + '0' + mesh3[1]
+
+
+def move_left(mesh):
+    """Navigate one mesh left"""
+    if len(mesh) == 4:
+        return mesh[:2] + str(int(mesh[2:])+1)
+
+    elif len(mesh) == 6:
+        mesh2 = mesh[4:6]
+        if int(mesh2[1]) < 7:
+            return mesh[:4] + mesh2[0] + str(int(mesh2[1])+1)
+        else:
+            return move_left(mesh[:4]) + mesh2[0] + '0'
+    else:
+        mesh2 = mesh[4:6]
+        mesh3 = mesh[6:]
+
+        if int(mesh3[1]) < 9:
+            return mesh[:6] + mesh3[0] + str(int(mesh3[1])+1)
+        else:
+            return move_left(mesh[:6]) + mesh3[0] + '0'
+
+
 def get_mesh_one(lat, lon):
     """ Get Mesh 1
     Latitude to decimal * 1.5 and Longitude - 100
@@ -35,7 +77,7 @@ def get_mesh_one(lat, lon):
     return str(int(lat*1.5)) + str(int(lon - 100))
 
 
-def get_mesh_boundaries(mesh):
+def get_mesh_sw(mesh):
     """Get the south latitude boundary and the west longitude boundary of the
     given mesh
     """
@@ -78,6 +120,11 @@ def get_mesh_boundaries(mesh):
     return (lat, lon)
 
 
+def get_mesh_ne(mesh):
+    """Get the mesh North East boundary"""
+    return get_mesh_sw(move_left(move_up(mesh)))
+
+
 def get_diff_dms(a, b):
     """Get difference in second between latitude or longitude in (d,m,s)form"""
     return (b[0]*3600 + b[1]*60 + b[2]) - (a[0]*3600 + a[1]*60 + a[2])
@@ -89,7 +136,7 @@ def get_mesh_two(lat, lon):
     Longitude 0 to 7 : 1 degree, step : 7m30s
     """
     mesh_one = get_mesh_one(lat, lon)
-    boundaries = get_mesh_boundaries(mesh_one)
+    boundaries = get_mesh_sw(mesh_one)
 
     lat_diff = get_diff_dms(boundaries[0], convert_decimal_to_dms(lat))
     lon_diff = get_diff_dms(boundaries[1], convert_decimal_to_dms(lon))
@@ -106,7 +153,7 @@ def get_mesh_three(lat, lon):
     Longitude 0 to 9 : 7m30s, step : 45sec
     """
     mesh_two = get_mesh_two(lat, lon)
-    boundaries = get_mesh_boundaries(mesh_two)
+    boundaries = get_mesh_sw(mesh_two)
 
     lat_diff = get_diff_dms(boundaries[0], convert_decimal_to_dms(lat))
     lon_diff = get_diff_dms(boundaries[1], convert_decimal_to_dms(lon))
@@ -122,11 +169,11 @@ def get_mesh_middle(mesh):
     Send back a tuple (lat, lon)"""
 
     if len(mesh) == 4:
-        return get_mesh_boundaries(mesh+'44')
+        return get_mesh_sw(mesh+'44')
     elif len(mesh) == 6:
-        return get_mesh_boundaries(mesh+'55')
+        return get_mesh_sw(mesh+'55')
     else:
-        boundaries = get_mesh_boundaries(mesh)
+        boundaries = get_mesh_sw(mesh)
         lat = boundaries[0]
         lon = boundaries[1]
 
